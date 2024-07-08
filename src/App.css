@@ -36,10 +36,11 @@
 #my-calculator {
   border: 1px solid beige;
   height: 440px;
-  width: 300px;
+  width: 305px;
   padding: 5px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
 
   .display {
     border: 1px solid transparent;
@@ -99,4 +100,9 @@
   #zero, #decimal {
     margin-top: -72px;
   }
+
+  #zero {
+    margin-left: -75px;
+  }
+
 }
