@@ -1,0 +1,102 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+#my-calculator {
+  border: 1px solid beige;
+  height: 440px;
+  width: 300px;
+  padding: 5px;
+  display: flex;
+  flex-wrap: wrap;
+
+  .display {
+    border: 1px solid transparent;
+    width: 99.3%;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    font-family: 'orbitron', sans-serif;
+    font-size: 24px;
+    padding: 5px;
+    color: rgb(234, 234, 33);
+
+    .current-value {
+      font-size: 38px;
+      color: aqua;
+    }
+  }
+
+  .button {
+    border: 1px solid beige;
+    height: 70px;
+    width: 73.1px;
+    border-radius: 1px;
+    text-align: center;
+    align-content: center;
+    font-family: 'orbitron', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .button:hover {
+    color: rgb(132, 54, 139);
+    background-color: rgba(245, 245, 220, 0.047);
+    font-size: 22px;
+    border: 0.1px solid rgb(105, 105, 105);
+  }
+
+  .flex {
+    width: 148px;
+  }
+
+  .flex:hover {
+    color: aqua;
+  }
+
+  .equals {
+    bottom: 70px;
+    height: 140px;
+  }
+
+  .equals:hover {
+    color: aqua;
+  }
+
+  #zero, #decimal {
+    margin-top: -72px;
+  }
+}
