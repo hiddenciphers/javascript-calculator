@@ -11,11 +11,29 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+.logo.wobble {
+  animation: wobble 0.1s;
+}
+
+@keyframes wobble {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
 }
 
 @keyframes logo-spin {
@@ -37,72 +55,95 @@
   border: 1px solid beige;
   height: 440px;
   width: 305px;
+  max-width: auto;
   padding: 5px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  perspective: 1000px;
+  transition: transform 0.2s;
+  filter: drop-shadow(0px 5px 10px beige);
+  border-radius: 1px;
+}
 
-  .display {
-    border: 1px solid transparent;
-    width: 99.3%;
-    height: 70px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-end;
-    font-family: 'orbitron', sans-serif;
-    font-size: 24px;
-    padding: 5px;
-    color: rgb(234, 234, 33);
+.display {
+  border: 1px solid transparent;
+  width: 99.3%;
+  height: 65px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-family: 'orbitron', sans-serif;
+  font-size: 22px;
+  padding: 5px;
+  color: rgb(234, 234, 33);
+  background-color: rgba(238, 238, 233, 0.056);
+  margin-bottom: 5px;
+}
 
-    .current-value {
-      font-size: 38px;
-      color: aqua;
-    }
-  }
+.current-value {
+  font-size: 16px;
+  color: aqua;
+}
 
-  .button {
-    border: 1px solid beige;
-    height: 70px;
-    width: 73.1px;
-    border-radius: 1px;
-    text-align: center;
-    align-content: center;
-    font-family: 'orbitron', sans-serif;
-    font-size: 16px;
-    cursor: pointer;
-  }
+.button {
+  border: 1px solid beige;
+  height: 70px;
+  width: 73.1px;
+  border-radius: 1px;
+  text-align: center;
+  align-content: center;
+  font-family: 'orbitron', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-  .button:hover {
-    color: rgb(132, 54, 139);
-    background-color: rgba(245, 245, 220, 0.047);
-    font-size: 22px;
-    border: 0.1px solid rgb(105, 105, 105);
-  }
+.button:hover {
+  color: rgb(182, 122, 187);
+  background-color: rgba(238, 238, 233, 0.056);
+  font-size: 22px;
+  border: 1px solid transparent;
+}
 
-  .flex {
-    width: 148px;
-  }
+.flex {
+  width: 148px;
+}
 
-  .flex:hover {
-    color: aqua;
-  }
+.flex:hover {
+  color: aqua;
+}
 
-  .equals {
-    bottom: 70px;
-    height: 140px;
-  }
+#zero:hover {
+  color: rgb(182, 122, 187);
+}
 
-  .equals:hover {
-    color: aqua;
-  }
+.equals {
+  bottom: 70px;
+  height: 140px;
+}
 
-  #zero, #decimal {
-    margin-top: -72px;
-  }
+.equals:hover {
+  color: aqua;
+}
 
-  #zero {
-    margin-left: -75px;
-  }
+#zero, #decimal {
+  margin-top: -72px;
+}
 
+#zero {
+  margin-left: -75px;
+}
+
+#divide:hover, #multiply:hover, #subtract:hover, #add:hover {
+  color: aqua;
+}
+
+#hiddenciphers-span {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
+  font-family: 'orbitron', sans-serif;
+  color: aqua;
+  font-size: 16px;
 }

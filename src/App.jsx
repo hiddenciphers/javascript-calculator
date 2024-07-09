@@ -1,149 +1,180 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
 
 function App() {
+  // State to hold the current value displayed on the calculator
   const [currentValue, setCurrentValue] = useState('0');
-  const [previousValue, setPreviousValue] = useState(null);
-  const [operator, setOperator] = useState(null);
-  const [waitingForOperand, setWaitingForOperand] = useState(false);
-  const [resultDisplayed, setResultDisplayed] = useState(false);
-  const [inputHistory, setInputHistory] = useState([]); // Track input history
 
-  const handleNumberClick = (e) => {
-    const value = e.target.innerText;
+  // State to hold the ongoing calculation expression
+  const [liveCalculation, setLiveCalculation] = useState('');
 
-    if (resultDisplayed) {
-      setCurrentValue(value);
-      setResultDisplayed(false);
-    } else if (waitingForOperand) {
-      setCurrentValue(value);
-      setWaitingForOperand(false);
-    } else {
-      setCurrentValue(currentValue === '0' ? value : currentValue + value);
+  // State to determine if the next input should reset the current value
+  const [resetNext, setResetNext] = useState(false);
+
+  // useEffect to handle mouse movement and apply the tilt effect on the calculator
+  useEffect(() => {
+    // Function to handle mouse movement
+    const handleMouseMove = (e) => {
+      const calculator = document.getElementById('my-calculator');
+      const { clientX, clientY } = e; // Get the mouse position
+      const { innerWidth, innerHeight } = window; // Get the window size
+
+      // Calculate the rotation based on mouse position
+      const rotateX = ((clientY / innerHeight) - 0.5) * 60; // Increased tilt effect
+      const rotateY = ((clientX / innerWidth) - 0.5) * -60; // Increased tilt effect
+
+      // Apply the calculated rotation to the calculator
+      calculator.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    };
+
+    // Add the event listener for mouse movement
+    window.addEventListener('mousemove', handleMouseMove);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  // Function to handle button clicks
+  const handleButtonClick = (value) => {
+    if (value === 'AC') {
+      // Reset all values when 'AC' (All Clear) button is clicked
+      setCurrentValue('0');
+      setLiveCalculation('');
+      setResetNext(false);
+      return;
     }
 
-    setInputHistory([...inputHistory, value]);
-  };
-
-  const handleOperatorClick = (e) => {
-    const value = e.target.innerText;
-    const lastChar = inputHistory[inputHistory.length - 1];
-
-    if (['+', 'x', '/'].includes(lastChar) && value !== '-') {
-      // Replace the last operator with the current one
-      const updatedHistory = [...inputHistory.slice(0, -1), value];
-      setInputHistory(updatedHistory);
-    } else {
-      setInputHistory([...inputHistory, value]);
-      setWaitingForOperand(true);
-      if (operator && !waitingForOperand) {
-        const result = performCalculation();
+    if (value === '=') {
+      // Handle equals button
+      try {
+        // Create a filtered expression that removes consecutive operators, allowing negative numbers
+        const filtered = (liveCalculation + currentValue).match(/(\*|\+|\/|-)?(\.|\-)?\d+/g).join('');
+        // Evaluate the filtered expression and update the current value with the result
+        const result = eval(filtered);
         setCurrentValue(String(result));
-        setPreviousValue(result);
+        setLiveCalculation('');
+        setResetNext(true);
+
+        // Add wobble effect to the Vite logo
+        const viteLogoElement = document.getElementById('vite-logo');
+        viteLogoElement.classList.add('wobble');
+        setTimeout(() => {
+          viteLogoElement.classList.remove('wobble');
+        }, 500);
+      } catch {
+        // Handle any errors in the evaluation
+        setCurrentValue('Error');
+        setLiveCalculation('');
+      }
+      return;
+    }
+
+    // Handle operator buttons
+    if (['+', '-', '*', '/'].includes(value)) {
+      if (resetNext) {
+        // If the calculator was reset, start a new calculation with the current value and the operator
+        setLiveCalculation(currentValue + value);
+        setResetNext(false);
       } else {
-        setPreviousValue(currentValue);
+        // Continue building the calculation expression
+        setLiveCalculation(liveCalculation + currentValue + value);
+      }
+      // Reset the current value
+      setCurrentValue('');
+      return;
+    }
+
+    // Handle decimal point button
+    if (value === '.') {
+      if (!currentValue.includes('.')) {
+        setCurrentValue(currentValue + value);
+      }
+      return;
+    }
+
+    // Prevent multiple leading zeros
+    if (currentValue === '0' && value === '0') {
+      return;
+    }
+
+    // Update the current value, either resetting it or appending to it
+    if (currentValue === '0' || resetNext) {
+      setCurrentValue(value);
+      setResetNext(false);
+    } else {
+      // Check if the maximum character limit is reached
+      if ((currentValue + value).length > 22) {
+        setCurrentValue('Digit Limit Met'); // Display error message
+        setTimeout(() => {
+          setCurrentValue(currentValue); // Revert to previous value after a short delay
+        }, 1000);
+      } else {
+        setCurrentValue(currentValue + value); // Append the new value
       }
     }
-
-    setOperator(value);
-    setResultDisplayed(false);
-  };
-
-  const performCalculation = () => {
-    const prev = parseFloat(previousValue);
-    const current = parseFloat(currentValue);
-    if (isNaN(prev) || isNaN(current)) return current;
-
-    let result;
-    switch (operator) {
-      case '+':
-        result = prev + current;
-        break;
-      case '-':
-        result = prev - current;
-        break;
-      case 'x':
-        result = prev * current;
-        break;
-      case '/':
-        result = prev / current;
-        break;
-      default:
-        return current;
-    }
-    return Math.round(result * 10000) / 10000; // Ensures precision to at least 4 decimal places
-  };
-
-  const handleEqualsClick = () => {
-    if (operator && previousValue !== null) {
-      const result = performCalculation();
-      setCurrentValue(String(result));
-      setPreviousValue(null);
-      setOperator(null);
-      setWaitingForOperand(false);
-      setResultDisplayed(true);
-      setInputHistory([]); // Reset input history after calculation
-    }
-  };
-
-  const handleClearClick = () => {
-    setCurrentValue('0');
-    setPreviousValue(null);
-    setOperator(null);
-    setWaitingForOperand(false);
-    setResultDisplayed(false);
-    setInputHistory([]); // Reset input history on clear
-  };
-
-  const handleDecimalClick = (e) => {
-    if (waitingForOperand) {
-      setCurrentValue('0.');
-      setWaitingForOperand(false);
-    } else if (!currentValue.includes('.')) {
-      setCurrentValue(currentValue + '.');
-    }
-    setInputHistory([...inputHistory, '.']);
   };
 
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
+        <a href="https://vitejs.dev" target="_blank" rel="noopener noreferrer">
+          <img src={viteLogo} className="logo" alt="Vite logo" id="vite-logo" />
         </a>
-        <a href="https://react.dev" target="_blank">
+        <a href="https://react.dev" target="_blank" rel="noopener noreferrer">
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
+
       <div id='my-calculator'>
         <div id='display' className='display'>
-          <div id='display' className='current-value'>{currentValue}</div>
+          <div className='live-calculation'>
+            {liveCalculation} {/* Display the ongoing calculation */}
+          </div>
+          <div className='current-value'>
+            {currentValue} {/* Display the current value */}
+          </div>
         </div>
-        <div id='clear' className='button flex' onClick={handleClearClick}>AC</div>
-        <div id='divide' className='button' onClick={handleOperatorClick}>/</div>
-        <div id='multiply' className='button' onClick={handleOperatorClick}>x</div>
-        <div id='seven' className='button' onClick={handleNumberClick}>7</div>
-        <div id='eight' className='button' onClick={handleNumberClick}>8</div>
-        <div id='nine' className='button' onClick={handleNumberClick}>9</div>
-        <div id='subtract' className='button' onClick={handleOperatorClick}>-</div>
-        <div id='four' className='button' onClick={handleNumberClick}>4</div>
-        <div id='five' className='button' onClick={handleNumberClick}>5</div>
-        <div id='six' className='button' onClick={handleNumberClick}>6</div>
-        <div id='add' className='button' onClick={handleOperatorClick}>+</div>
-        <div id='one' className='button' onClick={handleNumberClick}>1</div>
-        <div id='two' className='button' onClick={handleNumberClick}>2</div>
-        <div id='three' className='button' onClick={handleNumberClick}>3</div>
-        <div id='equals' className='button equals' onClick={handleEqualsClick}>=</div>
-        <div id='zero' className='button flex' onClick={handleNumberClick}>0</div>
-        <div id='decimal' className='button' onClick={handleDecimalClick}>.</div>
+
+        {/* Calculator buttons */}
+        <div id='clear' className='button flex' onClick={() => handleButtonClick('AC')}>AC</div>
+        <div id='divide' className='button' onClick={() => handleButtonClick('/')}>/</div>
+        <div id='multiply' className='button' onClick={() => handleButtonClick('*')}>x</div>
+        <div id='seven' className='button' onClick={() => handleButtonClick('7')}>7</div>
+        <div id='eight' className='button' onClick={() => handleButtonClick('8')}>8</div>
+        <div id='nine' className='button' onClick={() => handleButtonClick('9')}>9</div>
+        <div id='subtract' className='button' onClick={() => handleButtonClick('-')}>-</div>
+        <div id='four' className='button' onClick={() => handleButtonClick('4')}>4</div>
+        <div id='five' className='button' onClick={() => handleButtonClick('5')}>5</div>
+        <div id='six' className='button' onClick={() => handleButtonClick('6')}>6</div>
+        <div id='add' className='button' onClick={() => handleButtonClick('+')}>+</div>
+        <div id='one' className='button' onClick={() => handleButtonClick('1')}>1</div>
+        <div id='two' className='button' onClick={() => handleButtonClick('2')}>2</div>
+        <div id='three' className='button' onClick={() => handleButtonClick('3')}>3</div>
+        <div id='equals' className='button equals' onClick={() => handleButtonClick('=')}>=</div>
+        <div id='zero' className='button flex' onClick={() => handleButtonClick('0')}>0</div>
+        <div id='decimal' className='button' onClick={() => handleButtonClick('.')}>.</div>
       </div>
+      <br></br>
+      <span id='hiddenciphers-span'><a href='https://www.github.com/hiddenciphers' target='_blank' id='hiddenciphers'>@hiddenciphers</a>2024</span>
     </>
   );
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
 
 
 
